@@ -1,0 +1,64 @@
+{
+  "name": "PriceWise Accessibility Configuration",
+  "version": "1.0.0",
+  "wcag_level": "AA",
+  "compliance": {
+    "wcag_2.1": true,
+    "section_508": true,
+    "aria_1.2": true
+  },
+  "features": {
+    "keyboard_navigation": {
+      "enabled": true,
+      "focus_visible": true,
+      "skip_links": true,
+      "tab_trapping": true
+    },
+    "screen_reader": {
+      "aria_labels": true,
+      "aria_descriptions": true,
+      "live_regions": true,
+      "role_attributes": true
+    },
+    "visual": {
+      "high_contrast": true,
+      "reduced_motion": true,
+      "focus_indicators": true,
+      "color_contrast_ratio": 4.5
+    },
+    "forms": {
+      "error_messages": true,
+      "required_indicators": true,
+      "field_validation": true,
+      "autocomplete": true
+    }
+  },
+  "keyboard_shortcuts": {
+    "skip_to_content": "Tab",
+    "open_search": "Ctrl+K",
+    "close_modal": "Escape",
+    "navigate_back": "Escape"
+  },
+  "aria_roles": {
+    "navigation": "navigation",
+    "main_content": "main",
+    "search": "search",
+    "complementary": "complementary",
+    "banner": "banner",
+    "contentinfo": "contentinfo"
+  },
+  "color_blindness_support": {
+    "enabled": true,
+    "types": [
+      "protanopia",
+      "deuteranopia",
+      "tritanopia"
+    ]
+  },
+  "text_alternatives": {
+    "images": true,
+    "icons": true,
+    "charts": true,
+    "decorative_elements": true
+  }
+}

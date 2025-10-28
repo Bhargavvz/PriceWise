@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Check, X, Search, Zap, MapPin } from 'lucide-react';
+import { 
+  ArrowLeft, Plus, Trash2, Check, X, Search, Zap, MapPin,
+  ShoppingBag, DollarSign, TrendingUp, Store, Sparkles, 
+  Package, AlertCircle, CheckCircle2
+} from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { listService, productService } from '../services';
 import { useAuth } from '../contexts/AuthContext';
@@ -133,7 +137,6 @@ const ShoppingListDetailPage = () => {
     try {
       setOptimizing(true);
       
-      // Get user location or use default
       const lat = user?.location_lat || 40.7128;
       const lng = user?.location_lng || -74.0060;
 
@@ -157,11 +160,54 @@ const ShoppingListDetailPage = () => {
 
   if (!list) {
     return (
-      <div className="container" style={{ padding: '2rem 1rem', textAlign: 'center' }}>
-        <h2>List not found</h2>
-        <button onClick={() => navigate('/lists')} className="btn btn-primary" style={{ marginTop: '1rem' }}>
-          Back to Lists
-        </button>
+      <div style={{ 
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 'var(--space-8)'
+      }}>
+        <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+          <div style={{
+            width: '96px',
+            height: '96px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto var(--space-6)',
+            boxShadow: '0 10px 30px rgba(239, 68, 68, 0.3)'
+          }}>
+            <AlertCircle size={48} color="white" />
+          </div>
+          <h2 style={{ 
+            fontSize: 'var(--text-2xl)', 
+            marginBottom: 'var(--space-3)',
+            fontWeight: 'var(--font-bold)'
+          }}>
+            List Not Found
+          </h2>
+          <p style={{ 
+            color: 'var(--text-secondary)', 
+            marginBottom: 'var(--space-6)',
+            fontSize: 'var(--text-lg)'
+          }}>
+            The shopping list you're looking for doesn't exist or has been removed.
+          </p>
+          <button 
+            onClick={() => navigate('/lists')} 
+            className="btn btn-primary hover-lift"
+            style={{
+              background: 'var(--gradient-primary)',
+              color: 'white',
+              height: '3rem'
+            }}
+          >
+            <ArrowLeft size={20} />
+            Back to Lists
+          </button>
+        </div>
       </div>
     );
   }
@@ -170,273 +216,761 @@ const ShoppingListDetailPage = () => {
   const checkedItems = items.filter(item => item.checked).length;
   const progressPercent = totalItems > 0 ? (checkedItems / totalItems) * 100 : 0;
 
+  // Get list color (from ShoppingListsPage color system)
+  const colors = ['#8b5cf6', '#10b981', '#f59e0b', '#ec4899'];
+  const listColor = colors[list.id % colors.length];
+
   return (
-    <div className="container" style={{ padding: '2rem 1rem' }}>
-      {/* Header */}
-      <button
-        onClick={() => navigate('/lists')}
-        className="btn btn-secondary"
-        style={{ marginBottom: '1.5rem' }}
-      >
-        <ArrowLeft size={20} />
-        Back to Lists
-      </button>
+    <div style={{ minHeight: '100vh', paddingBottom: 'var(--space-12)' }}>
+      {/* Hero Header with Gradient */}
+      <div style={{
+        background: `linear-gradient(135deg, ${listColor} 0%, ${listColor}dd 100%)`,
+        padding: 'var(--space-12) 0 var(--space-16)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Animated Pattern Overlay */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          opacity: 0.1,
+          background: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+          animation: 'fadeIn 1s ease-out'
+        }} />
 
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>{list.name}</h1>
-        {list.description && (
-          <p style={{ color: 'var(--text-secondary)' }}>{list.description}</p>
-        )}
-      </div>
+        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+          {/* Back Button */}
+          <button
+            onClick={() => navigate('/lists')}
+            className="btn hover-lift"
+            style={{
+              marginBottom: 'var(--space-6)',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              color: 'white',
+              animation: 'fadeInDown 0.6s ease-out'
+            }}
+          >
+            <ArrowLeft size={20} />
+            Back to Lists
+          </button>
 
-      {/* Progress Bar */}
-      {totalItems > 0 && (
-        <div className="card" style={{ marginBottom: '2rem' }}>
-          <div style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: '500' }}>Progress</span>
-            <span style={{ color: 'var(--text-secondary)' }}>
-              {checkedItems} of {totalItems} items
-            </span>
-          </div>
-          <div style={{
-            width: '100%',
-            height: '8px',
-            backgroundColor: 'var(--bg-tertiary)',
-            borderRadius: '999px',
-            overflow: 'hidden'
+          {/* List Info */}
+          <div style={{ 
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 'var(--space-6)',
+            flexWrap: 'wrap',
+            animation: 'fadeInUp 0.6s ease-out 0.1s backwards'
           }}>
+            {/* List Icon */}
             <div style={{
-              width: `${progressPercent}%`,
-              height: '100%',
-              backgroundColor: 'var(--primary)',
-              transition: 'width 0.3s ease'
-            }} />
-          </div>
-        </div>
-      )}
+              width: '120px',
+              height: '120px',
+              borderRadius: 'var(--radius-2xl)',
+              background: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
+            }}>
+              <ShoppingBag size={56} color={listColor} />
+            </div>
 
-      {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-        <button
-          onClick={() => setShowAddProduct(true)}
-          className="btn btn-primary"
-        >
-          <Plus size={20} />
-          Add Product
-        </button>
-        
-        <button
-          onClick={handleOptimize}
-          className="btn btn-secondary"
-          disabled={optimizing || items.length === 0}
-        >
-          <Zap size={20} />
-          {optimizing ? 'Optimizing...' : 'Optimize List'}
-        </button>
-      </div>
+            {/* List Details */}
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <h1 style={{
+                color: 'white',
+                marginBottom: 'var(--space-2)',
+                fontSize: 'var(--text-5xl)',
+                fontWeight: 'var(--font-extrabold)',
+                letterSpacing: '-0.02em'
+              }}>
+                {list.name}
+              </h1>
+              
+              {list.description && (
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: 'var(--text-lg)',
+                  marginBottom: 'var(--space-4)',
+                  lineHeight: '1.6'
+                }}>
+                  {list.description}
+                </p>
+              )}
 
-      {/* Shopping List Items */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h2 style={{ marginBottom: '1.5rem' }}>Items ({totalItems})</h2>
-
-        {items.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {items.map(item => (
-              <div
-                key={item.id}
-                style={{
-                  padding: '1rem',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-md)',
+              {/* Quick Stats */}
+              <div style={{
+                display: 'flex',
+                gap: 'var(--space-4)',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '1rem',
-                  opacity: item.checked ? 0.6 : 1,
-                  transition: 'var(--transition)'
-                }}
-              >
-                {/* Checkbox */}
-                <button
-                  onClick={() => handleToggleChecked(item.id, item.checked)}
-                  style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: `2px solid ${item.checked ? 'var(--primary)' : 'var(--border)'}`,
-                    backgroundColor: item.checked ? 'var(--primary)' : 'transparent',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    flexShrink: 0
-                  }}
-                >
-                  {item.checked && <Check size={16} color="white" />}
-                </button>
-
-                {/* Product Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h4 style={{
-                    marginBottom: '0.25rem',
-                    textDecoration: item.checked ? 'line-through' : 'none'
-                  }}>
-                    {item.product_name}
-                  </h4>
-                  <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    {item.category && <span>{item.category}</span>}
-                    {item.brand && <span>• {item.brand}</span>}
-                  </div>
-                </div>
-
-                {/* Quantity Controls */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <button
-                    onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                    className="btn btn-sm btn-secondary"
-                    style={{ padding: '0.25rem 0.5rem' }}
-                    disabled={item.quantity <= 1}
-                  >
-                    -
-                  </button>
-                  <span style={{ 
-                    minWidth: '2rem', 
-                    textAlign: 'center',
-                    fontWeight: '500'
-                  }}>
-                    {item.quantity}
+                  gap: 'var(--space-2)',
+                  padding: 'var(--space-2) var(--space-4)',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 'var(--radius-full)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                }}>
+                  <Package size={18} color="white" />
+                  <span style={{ color: 'white', fontWeight: 'var(--font-semibold)' }}>
+                    {totalItems} items
                   </span>
-                  <button
-                    onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                    className="btn btn-sm btn-secondary"
-                    style={{ padding: '0.25rem 0.5rem' }}
-                  >
-                    +
-                  </button>
                 </div>
 
-                {/* Remove Button */}
-                <button
-                  onClick={() => handleRemoveItem(item.id)}
-                  className="btn btn-sm btn-secondary"
-                  style={{ padding: '0.5rem', color: 'var(--danger)' }}
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-2)',
+                  padding: 'var(--space-2) var(--space-4)',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: 'var(--radius-full)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                }}>
+                  <CheckCircle2 size={18} color="white" />
+                  <span style={{ color: 'white', fontWeight: 'var(--font-semibold)' }}>
+                    {checkedItems} completed
+                  </span>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '3rem' }}>
-            <h3 style={{ marginBottom: '0.5rem' }}>No items yet</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-              Add products to start building your shopping list
-            </p>
-            <button onClick={() => setShowAddProduct(true)} className="btn btn-primary">
-              <Plus size={20} />
-              Add Your First Item
-            </button>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* Optimization Results */}
-      {optimization && (
-        <div className="card">
-          <h2 style={{ marginBottom: '1.5rem' }}>
-            Store Recommendations
+      <div className="container" style={{ marginTop: '-3rem', position: 'relative', zIndex: 10 }}>
+        {/* Progress Card */}
+        {totalItems > 0 && (
+          <div className="card hover-lift" style={{
+            marginBottom: 'var(--space-8)',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.1) 100%)',
+            border: '2px solid rgba(16, 185, 129, 0.2)',
+            animation: 'fadeInUp 0.6s ease-out 0.2s backwards'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 'var(--space-4)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-3)'
+              }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'var(--gradient-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <TrendingUp size={24} color="white" />
+                </div>
+                <div>
+                  <h3 style={{ 
+                    marginBottom: 'var(--space-1)',
+                    fontSize: 'var(--text-lg)',
+                    fontWeight: 'var(--font-bold)'
+                  }}>
+                    Shopping Progress
+                  </h3>
+                  <p style={{ 
+                    color: 'var(--text-secondary)',
+                    fontSize: 'var(--text-sm)'
+                  }}>
+                    {checkedItems} of {totalItems} items completed
+                  </p>
+                </div>
+              </div>
+
+              <div style={{
+                fontSize: 'var(--text-4xl)',
+                fontWeight: 'var(--font-extrabold)',
+                background: 'var(--gradient-primary)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>
+                {Math.round(progressPercent)}%
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="progress-bar">
+              <div 
+                className="progress-bar-fill"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div style={{
+          display: 'flex',
+          gap: 'var(--space-4)',
+          marginBottom: 'var(--space-8)',
+          flexWrap: 'wrap',
+          animation: 'fadeInUp 0.6s ease-out 0.3s backwards'
+        }}>
+          <button
+            onClick={() => setShowAddProduct(true)}
+            className="btn hover-lift"
+            style={{
+              flex: '1',
+              minWidth: '200px',
+              background: 'var(--gradient-primary)',
+              color: 'white',
+              height: '3.5rem',
+              fontSize: 'var(--text-lg)',
+              fontWeight: 'var(--font-semibold)'
+            }}
+          >
+            <Plus size={24} />
+            Add Product
+          </button>
+          
+          <button
+            onClick={handleOptimize}
+            className="btn btn-secondary hover-lift"
+            disabled={optimizing || items.length === 0}
+            style={{
+              flex: '1',
+              minWidth: '200px',
+              height: '3.5rem',
+              fontSize: 'var(--text-lg)',
+              fontWeight: 'var(--font-semibold)',
+              background: optimizing ? 'var(--bg-tertiary)' : 'transparent',
+              border: '2px solid var(--border)'
+            }}
+          >
+            <Zap size={24} />
+            {optimizing ? 'Optimizing...' : 'Optimize List'}
+          </button>
+        </div>
+
+        {/* Shopping List Items */}
+        <div className="card" style={{
+          marginBottom: 'var(--space-8)',
+          animation: 'fadeInUp 0.6s ease-out 0.4s backwards'
+        }}>
+          {/* Icon Header */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '56px',
+            height: '56px',
+            borderRadius: 'var(--radius-xl)',
+            background: `linear-gradient(135deg, ${listColor} 0%, ${listColor}dd 100%)`,
+            marginBottom: 'var(--space-4)'
+          }}>
+            <ShoppingBag size={28} color="white" />
+          </div>
+
+          <h2 style={{
+            fontSize: 'var(--text-3xl)',
+            fontWeight: 'var(--font-bold)',
+            marginBottom: 'var(--space-2)'
+          }}>
+            Shopping Items
           </h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-            Based on {optimization.total_items} items in your list
+          <p style={{
+            color: 'var(--text-secondary)',
+            marginBottom: 'var(--space-6)',
+            fontSize: 'var(--text-lg)'
+          }}>
+            {totalItems === 0 
+              ? 'No items in your list yet. Add some products to get started!'
+              : `Manage your ${totalItems} shopping ${totalItems === 1 ? 'item' : 'items'}`
+            }
           </p>
 
-          {optimization.recommendations && optimization.recommendations.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {optimization.recommendations.slice(0, 5).map((rec, index) => (
+          {items.length > 0 ? (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--space-3)'
+            }}>
+              {items.map((item, index) => (
                 <div
-                  key={rec.store_id}
+                  key={item.id}
+                  className="hover-lift"
                   style={{
-                    padding: '1.5rem',
-                    border: `2px solid ${index === 0 ? 'var(--primary)' : 'var(--border)'}`,
-                    borderRadius: 'var(--radius-lg)',
-                    backgroundColor: index === 0 ? 'rgba(22, 163, 74, 0.05)' : 'transparent'
+                    padding: 'var(--space-4)',
+                    border: '2px solid var(--border)',
+                    borderRadius: 'var(--radius-xl)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-4)',
+                    opacity: item.checked ? 0.6 : 1,
+                    transition: 'all var(--transition-base)',
+                    background: item.checked 
+                      ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%)'
+                      : 'var(--bg-primary)',
+                    animation: `fadeInUp 0.4s ease-out ${0.05 * index}s backwards`
                   }}
                 >
-                  {index === 0 && (
-                    <div style={{
-                      display: 'inline-block',
-                      padding: '0.25rem 0.75rem',
-                      backgroundColor: 'var(--primary)',
-                      color: 'white',
-                      borderRadius: 'var(--radius-sm)',
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      marginBottom: '1rem'
+                  {/* Checkbox */}
+                  <button
+                    onClick={() => handleToggleChecked(item.id, item.checked)}
+                    className="hover-scale"
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: 'var(--radius-md)',
+                      border: `3px solid ${item.checked ? 'var(--primary)' : 'var(--border)'}`,
+                      backgroundColor: item.checked ? 'var(--primary)' : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      transition: 'all var(--transition-base)'
+                    }}
+                  >
+                    {item.checked && <Check size={18} color="white" strokeWidth={3} />}
+                  </button>
+
+                  {/* Product Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h4 style={{
+                      marginBottom: 'var(--space-1)',
+                      textDecoration: item.checked ? 'line-through' : 'none',
+                      fontSize: 'var(--text-lg)',
+                      fontWeight: 'var(--font-semibold)',
+                      color: item.checked ? 'var(--text-tertiary)' : 'var(--text-primary)'
                     }}>
-                      BEST VALUE
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ marginBottom: '0.5rem' }}>{rec.store_name}</h3>
-                      {rec.chain_name && (
-                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                          {rec.chain_name}
-                        </p>
-                      )}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-tertiary)' }}>
-                        <MapPin size={14} />
-                        <span>{rec.distance.toFixed(1)} miles away</span>
-                      </div>
-                    </div>
-
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: index === 0 ? 'var(--primary)' : 'var(--text-primary)' }}>
-                        ${rec.total.toFixed(2)}
-                      </div>
-                      <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                        {rec.coverage} of {optimization.total_items} items ({rec.coverage_percent}%)
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Items at this store */}
-                  <div style={{
-                    paddingTop: '1rem',
-                    borderTop: '1px solid var(--border)'
-                  }}>
-                    <p style={{ fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.75rem' }}>
-                      Available items:
-                    </p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
-                      {rec.items.slice(0, 6).map(item => (
-                        <div key={item.product_id} style={{
-                          fontSize: '0.875rem',
-                          color: 'var(--text-secondary)',
-                          display: 'flex',
-                          justifyContent: 'space-between'
+                      {item.product_name}
+                    </h4>
+                    <div style={{
+                      display: 'flex',
+                      gap: 'var(--space-3)',
+                      fontSize: 'var(--text-sm)',
+                      color: 'var(--text-secondary)',
+                      flexWrap: 'wrap'
+                    }}>
+                      {item.category && (
+                        <span style={{
+                          padding: 'var(--space-1) var(--space-2)',
+                          background: 'var(--bg-tertiary)',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: 'var(--text-xs)',
+                          fontWeight: 'var(--font-medium)'
                         }}>
-                          <span>{item.product_name}</span>
-                          <span style={{ fontWeight: '500' }}>${item.price.toFixed(2)}</span>
-                        </div>
-                      ))}
-                      {rec.items.length > 6 && (
-                        <p style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)' }}>
-                          +{rec.items.length - 6} more items
-                        </p>
+                          {item.category}
+                        </span>
+                      )}
+                      {item.brand && (
+                        <span style={{
+                          padding: 'var(--space-1) var(--space-2)',
+                          background: 'var(--bg-tertiary)',
+                          borderRadius: 'var(--radius-sm)',
+                          fontSize: 'var(--text-xs)',
+                          fontWeight: 'var(--font-medium)'
+                        }}>
+                          {item.brand}
+                        </span>
                       )}
                     </div>
                   </div>
+
+                  {/* Quantity Controls */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-2)',
+                    padding: 'var(--space-2)',
+                    background: 'var(--bg-secondary)',
+                    borderRadius: 'var(--radius-lg)'
+                  }}>
+                    <button
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                      className="btn btn-sm hover-scale"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 'var(--radius-md)',
+                        border: '2px solid var(--border)',
+                        background: 'var(--bg-primary)'
+                      }}
+                      disabled={item.quantity <= 1}
+                    >
+                      -
+                    </button>
+                    <span style={{
+                      minWidth: '2.5rem',
+                      textAlign: 'center',
+                      fontWeight: 'var(--font-bold)',
+                      fontSize: 'var(--text-lg)'
+                    }}>
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                      className="btn btn-sm hover-scale"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 'var(--radius-md)',
+                        border: '2px solid var(--border)',
+                        background: 'var(--bg-primary)'
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Remove Button */}
+                  <button
+                    onClick={() => handleRemoveItem(item.id)}
+                    className="btn btn-sm hover-scale"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 'var(--radius-lg)',
+                      border: '2px solid rgba(239, 68, 68, 0.2)',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      color: 'var(--danger)'
+                    }}
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               ))}
             </div>
           ) : (
-            <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>
-              No recommendations available. Make sure items in your list have prices at nearby stores.
-            </p>
+            // Empty State
+            <div style={{
+              textAlign: 'center',
+              padding: 'var(--space-16) var(--space-8)',
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.1) 100%)',
+              borderRadius: 'var(--radius-2xl)',
+              border: '2px dashed rgba(16, 185, 129, 0.2)'
+            }}>
+              <div style={{
+                width: '96px',
+                height: '96px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto var(--space-6)',
+                boxShadow: '0 10px 30px rgba(16, 185, 129, 0.3)'
+              }}>
+                <ShoppingBag size={48} color="white" />
+              </div>
+              <h3 style={{
+                marginBottom: 'var(--space-2)',
+                fontSize: 'var(--text-2xl)',
+                fontWeight: 'var(--font-bold)'
+              }}>
+                No Items Yet
+              </h3>
+              <p style={{
+                color: 'var(--text-secondary)',
+                marginBottom: 'var(--space-6)',
+                fontSize: 'var(--text-lg)',
+                maxWidth: '400px',
+                margin: '0 auto var(--space-6)'
+              }}>
+                Start building your shopping list by adding products
+              </p>
+              <button
+                onClick={() => setShowAddProduct(true)}
+                className="btn hover-lift"
+                style={{
+                  background: 'var(--gradient-primary)',
+                  color: 'white',
+                  height: '3.5rem',
+                  fontSize: 'var(--text-lg)',
+                  fontWeight: 'var(--font-semibold)'
+                }}
+              >
+                <Plus size={24} />
+                Add Your First Item
+              </button>
+            </div>
           )}
         </div>
-      )}
+
+        {/* Optimization Results */}
+        {optimization && (
+          <div className="card" style={{
+            animation: 'fadeInUp 0.6s ease-out 0.5s backwards'
+          }}>
+            {/* Icon Header */}
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '56px',
+              height: '56px',
+              borderRadius: 'var(--radius-xl)',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              marginBottom: 'var(--space-4)'
+            }}>
+              <Zap size={28} color="white" />
+            </div>
+
+            <h2 style={{
+              fontSize: 'var(--text-3xl)',
+              fontWeight: 'var(--font-bold)',
+              marginBottom: 'var(--space-2)'
+            }}>
+              Smart Store Recommendations
+            </h2>
+            <p style={{
+              color: 'var(--text-secondary)',
+              marginBottom: 'var(--space-6)',
+              fontSize: 'var(--text-lg)'
+            }}>
+              Based on {optimization.total_items} items in your list, here are the best stores
+            </p>
+
+            {optimization.recommendations && optimization.recommendations.length > 0 ? (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--space-4)'
+              }}>
+                {optimization.recommendations.slice(0, 5).map((rec, index) => (
+                  <div
+                    key={rec.store_id}
+                    className="hover-lift"
+                    style={{
+                      padding: 'var(--space-6)',
+                      border: index === 0 
+                        ? '3px solid var(--primary)'
+                        : '2px solid var(--border)',
+                      borderRadius: 'var(--radius-2xl)',
+                      background: index === 0 
+                        ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)'
+                        : 'var(--bg-primary)',
+                      position: 'relative',
+                      animation: `fadeInUp 0.4s ease-out ${0.1 * index}s backwards`
+                    }}
+                  >
+                    {/* Best Value Badge */}
+                    {index === 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '-12px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 'var(--space-2)',
+                        padding: 'var(--space-2) var(--space-4)',
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: 'white',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: 'var(--text-sm)',
+                        fontWeight: 'var(--font-bold)',
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
+                        animation: 'pulse 2s ease-in-out infinite'
+                      }}>
+                        <Sparkles size={16} />
+                        BEST VALUE
+                      </div>
+                    )}
+
+                    {/* Store Info */}
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: 'var(--space-4)',
+                      flexWrap: 'wrap',
+                      gap: 'var(--space-4)'
+                    }}>
+                      <div style={{ flex: 1, minWidth: '200px' }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 'var(--space-3)',
+                          marginBottom: 'var(--space-2)'
+                        }}>
+                          <div style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: 'var(--radius-lg)',
+                            background: index === 0 
+                              ? 'var(--gradient-primary)'
+                              : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 'var(--text-xl)',
+                            fontWeight: 'var(--font-bold)',
+                            color: 'white'
+                          }}>
+                            #{index + 1}
+                          </div>
+                          <div>
+                            <h3 style={{
+                              marginBottom: 'var(--space-1)',
+                              fontSize: 'var(--text-xl)',
+                              fontWeight: 'var(--font-bold)'
+                            }}>
+                              {rec.store_name}
+                            </h3>
+                            {rec.chain_name && (
+                              <p style={{
+                                fontSize: 'var(--text-sm)',
+                                color: 'var(--text-secondary)'
+                              }}>
+                                {rec.chain_name}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 'var(--space-2)',
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--text-tertiary)'
+                        }}>
+                          <MapPin size={16} />
+                          <span>{rec.distance.toFixed(1)} miles away</span>
+                        </div>
+                      </div>
+
+                      {/* Total Price */}
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{
+                          fontSize: 'var(--text-5xl)',
+                          fontWeight: 'var(--font-extrabold)',
+                          background: index === 0 
+                            ? 'var(--gradient-primary)'
+                            : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          marginBottom: 'var(--space-1)'
+                        }}>
+                          ${rec.total.toFixed(2)}
+                        </div>
+                        <p style={{
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--text-secondary)',
+                          fontWeight: 'var(--font-medium)'
+                        }}>
+                          {rec.coverage} of {optimization.total_items} items ({rec.coverage_percent}%)
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Available Items */}
+                    <div style={{
+                      paddingTop: 'var(--space-4)',
+                      borderTop: '1px solid var(--border)'
+                    }}>
+                      <p style={{
+                        fontSize: 'var(--text-sm)',
+                        fontWeight: 'var(--font-semibold)',
+                        marginBottom: 'var(--space-3)',
+                        color: 'var(--text-secondary)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>
+                        Available Items:
+                      </p>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                        gap: 'var(--space-2)'
+                      }}>
+                        {rec.items.slice(0, 6).map(item => (
+                          <div
+                            key={item.product_id}
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: 'var(--space-2) var(--space-3)',
+                              background: 'var(--bg-secondary)',
+                              borderRadius: 'var(--radius-md)',
+                              fontSize: 'var(--text-sm)'
+                            }}
+                          >
+                            <span style={{ 
+                              color: 'var(--text-secondary)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {item.product_name}
+                            </span>
+                            <span style={{
+                              fontWeight: 'var(--font-bold)',
+                              color: 'var(--text-primary)',
+                              marginLeft: 'var(--space-2)'
+                            }}>
+                              ${item.price.toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      {rec.items.length > 6 && (
+                        <p style={{
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--text-tertiary)',
+                          marginTop: 'var(--space-3)',
+                          fontStyle: 'italic'
+                        }}>
+                          +{rec.items.length - 6} more items available
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{
+                textAlign: 'center',
+                padding: 'var(--space-12)',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.1) 100%)',
+                borderRadius: 'var(--radius-2xl)',
+                border: '2px dashed rgba(245, 158, 11, 0.2)'
+              }}>
+                <AlertCircle size={48} color="#f59e0b" style={{ margin: '0 auto var(--space-4)' }} />
+                <p style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: 'var(--text-lg)'
+                }}>
+                  No recommendations available. Make sure items in your list have prices at nearby stores.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Add Product Modal */}
       {showAddProduct && (
@@ -447,43 +981,81 @@ const ShoppingListDetailPage = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            background: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(8px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 100,
-            padding: '1rem'
+            zIndex: 1050,
+            padding: 'var(--space-4)',
+            animation: 'fadeIn 0.2s ease-out'
           }}
           onClick={() => setShowAddProduct(false)}
         >
           <div
             className="card"
-            style={{ width: '100%', maxWidth: '600px', maxHeight: '80vh', overflow: 'auto' }}
+            style={{
+              width: '100%',
+              maxWidth: '600px',
+              maxHeight: '85vh',
+              overflow: 'auto',
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.3)',
+              animation: 'scaleIn 0.3s ease-out'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3>Add Product to List</h3>
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 'var(--space-6)',
+              paddingBottom: 'var(--space-4)',
+              borderBottom: '2px solid var(--border)'
+            }}>
+              <div>
+                <h3 style={{
+                  fontSize: 'var(--text-2xl)',
+                  fontWeight: 'var(--font-bold)',
+                  marginBottom: 'var(--space-1)'
+                }}>
+                  Add Product to List
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>
+                  Search and select products to add
+                </p>
+              </div>
               <button
                 onClick={() => setShowAddProduct(false)}
                 style={{
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '0.5rem',
-                  color: 'var(--text-secondary)'
+                  padding: 'var(--space-2)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--text-secondary)',
+                  transition: 'all var(--transition-base)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--bg-tertiary)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'none';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
                 }}
               >
-                <X size={24} />
+                <X size={28} />
               </button>
             </div>
 
-            {/* Search */}
-            <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+            {/* Search Input */}
+            <div style={{ position: 'relative', marginBottom: 'var(--space-6)' }}>
               <Search
-                size={20}
+                size={22}
                 style={{
                   position: 'absolute',
-                  left: '1rem',
+                  left: 'var(--space-4)',
                   top: '50%',
                   transform: 'translateY(-50%)',
                   color: 'var(--text-tertiary)'
@@ -495,58 +1067,142 @@ const ShoppingListDetailPage = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="input"
-                style={{ paddingLeft: '3rem' }}
+                style={{
+                  paddingLeft: 'var(--space-12)',
+                  height: '3.5rem',
+                  fontSize: 'var(--text-lg)'
+                }}
                 autoFocus
               />
             </div>
 
             {/* Search Results */}
-            {searching && <LoadingSpinner />}
+            {searching && (
+              <div style={{ padding: 'var(--space-8)', textAlign: 'center' }}>
+                <LoadingSpinner />
+              </div>
+            )}
             
             {!searching && searchResults.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {searchResults.map(product => (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--space-3)'
+              }}>
+                {searchResults.map((product, index) => (
                   <button
                     key={product.id}
                     onClick={() => handleAddProduct(product)}
+                    className="hover-lift"
                     style={{
-                      padding: '1rem',
-                      border: '1px solid var(--border)',
-                      borderRadius: 'var(--radius-md)',
-                      backgroundColor: 'transparent',
+                      padding: 'var(--space-4)',
+                      border: '2px solid var(--border)',
+                      borderRadius: 'var(--radius-xl)',
+                      background: 'var(--bg-primary)',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      transition: 'var(--transition)',
+                      transition: 'all var(--transition-base)',
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      animation: `fadeInUp 0.3s ease-out ${0.05 * index}s backwards`
                     }}
-                    onMouseEnter={(e) => e.target.style.borderColor = 'var(--primary)'}
-                    onMouseLeave={(e) => e.target.style.borderColor = 'var(--border)'}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.background = 'var(--bg-primary)';
+                    }}
                   >
-                    <div>
-                      <h4 style={{ marginBottom: '0.25rem' }}>{product.name}</h4>
-                      <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                        {product.brand && `${product.brand} • `}
-                        {product.category}
-                      </p>
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{
+                        marginBottom: 'var(--space-1)',
+                        fontSize: 'var(--text-lg)',
+                        fontWeight: 'var(--font-semibold)'
+                      }}>
+                        {product.name}
+                      </h4>
+                      <div style={{
+                        display: 'flex',
+                        gap: 'var(--space-2)',
+                        fontSize: 'var(--text-sm)',
+                        color: 'var(--text-secondary)',
+                        flexWrap: 'wrap'
+                      }}>
+                        {product.brand && (
+                          <span style={{
+                            padding: 'var(--space-1) var(--space-2)',
+                            background: 'var(--bg-tertiary)',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: 'var(--text-xs)'
+                          }}>
+                            {product.brand}
+                          </span>
+                        )}
+                        {product.category && (
+                          <span style={{
+                            padding: 'var(--space-1) var(--space-2)',
+                            background: 'var(--bg-tertiary)',
+                            borderRadius: 'var(--radius-sm)',
+                            fontSize: 'var(--text-xs)'
+                          }}>
+                            {product.category}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <Plus size={20} color="var(--primary)" />
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: 'var(--radius-lg)',
+                      background: 'var(--gradient-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <Plus size={24} color="white" />
+                    </div>
                   </button>
                 ))}
               </div>
             )}
 
             {!searching && searchQuery && searchResults.length === 0 && (
-              <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>
-                No products found. Try a different search term.
-              </p>
+              <div style={{
+                textAlign: 'center',
+                padding: 'var(--space-12)',
+                background: 'var(--bg-secondary)',
+                borderRadius: 'var(--radius-xl)'
+              }}>
+                <Search size={48} color="var(--text-tertiary)" style={{ margin: '0 auto var(--space-4)' }} />
+                <p style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: 'var(--text-lg)'
+                }}>
+                  No products found. Try a different search term.
+                </p>
+              </div>
             )}
 
             {!searchQuery && (
-              <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>
-                Start typing to search for products
-              </p>
+              <div style={{
+                textAlign: 'center',
+                padding: 'var(--space-12)',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.1) 100%)',
+                borderRadius: 'var(--radius-xl)',
+                border: '2px dashed rgba(16, 185, 129, 0.2)'
+              }}>
+                <Search size={48} color="#10b981" style={{ margin: '0 auto var(--space-4)' }} />
+                <p style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: 'var(--text-lg)'
+                }}>
+                  Start typing to search for products
+                </p>
+              </div>
             )}
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Plus, Trash2, Search, X, TrendingDown, AlertCircle } from 'lucide-react';
+import { Bell, Plus, Trash2, Search, X, TrendingDown, AlertCircle, Sparkles, ArrowRight, LineChart as LineChartIcon } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { productService } from '../services';
 import { useToast } from '../contexts/ToastContext';
@@ -37,10 +38,9 @@ const PriceAlertsPage = () => {
   const loadAlerts = async () => {
     try {
       setLoading(true);
-      // Simulate loading alerts - in real app, fetch from backend
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Mock data
+      // Mock data with price history
       setAlerts([
         {
           id: 1,
@@ -53,7 +53,13 @@ const PriceAlertsPage = () => {
           target_price: 4.99,
           is_active: true,
           triggered: false,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          price_history: [
+            { date: '2024-01-01', price: 6.49 },
+            { date: '2024-01-08', price: 6.29 },
+            { date: '2024-01-15', price: 6.19 },
+            { date: '2024-01-22', price: 5.99 }
+          ]
         },
         {
           id: 2,
@@ -66,7 +72,13 @@ const PriceAlertsPage = () => {
           target_price: 0.59,
           is_active: true,
           triggered: true,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          price_history: [
+            { date: '2024-01-01', price: 0.99 },
+            { date: '2024-01-08', price: 0.89 },
+            { date: '2024-01-15', price: 0.79 },
+            { date: '2024-01-22', price: 0.59 }
+          ]
         }
       ]);
     } catch (error) {
@@ -98,7 +110,6 @@ const PriceAlertsPage = () => {
     }
 
     try {
-      // Simulate creating alert - in real app, call backend API
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const newAlert = {
@@ -108,11 +119,12 @@ const PriceAlertsPage = () => {
         product_image: selectedProduct.image_url,
         brand: selectedProduct.brand,
         category: selectedProduct.category,
-        current_price: 0, // Would come from backend
+        current_price: 0,
         target_price: parseFloat(targetPrice),
         is_active: true,
         triggered: false,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        price_history: []
       };
 
       setAlerts([newAlert, ...alerts]);
@@ -130,7 +142,6 @@ const PriceAlertsPage = () => {
     if (!confirm('Delete this price alert?')) return;
 
     try {
-      // Simulate deletion - in real app, call backend API
       await new Promise(resolve => setTimeout(resolve, 300));
       setAlerts(alerts.filter(alert => alert.id !== alertId));
       toast.success('Alert deleted');
@@ -141,7 +152,6 @@ const PriceAlertsPage = () => {
 
   const handleToggleAlert = async (alertId) => {
     try {
-      // Simulate toggle - in real app, call backend API
       await new Promise(resolve => setTimeout(resolve, 300));
       setAlerts(alerts.map(alert =>
         alert.id === alertId ? { ...alert, is_active: !alert.is_active } : alert
@@ -160,14 +170,11 @@ const PriceAlertsPage = () => {
   }
 
   return (
-    <div className="container" style={{ padding: '2rem 1rem' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        borderRadius: 'var(--radius-xl)',
-        padding: '3rem 2rem',
-        marginBottom: '3rem',
-        color: 'white',
+        background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+        padding: 'var(--space-12) 0 var(--space-16)',
         position: 'relative',
         overflow: 'hidden'
       }}>
@@ -178,260 +185,484 @@ const PriceAlertsPage = () => {
           right: 0,
           bottom: 0,
           opacity: 0.1,
-          background: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }} />
-        
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <Bell size={40} />
-            <h1 style={{ color: 'white', margin: 0 }}>Price Alerts</h1>
+
+        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+          <div className="animate-fadeInDown" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(10px)',
+            padding: 'var(--space-2) var(--space-4)',
+            borderRadius: 'var(--radius-full)',
+            marginBottom: 'var(--space-4)',
+            border: '1px solid rgba(255, 255, 255, 0.3)'
+          }}>
+            <Bell size={16} />
+            <span style={{ fontSize: 'var(--text-sm)', fontWeight: '500' }}>Smart Alerts</span>
           </div>
-          <p style={{ fontSize: '1.125rem', opacity: 0.9, marginBottom: '2rem' }}>
+
+          <h1 className="animate-fadeInUp" style={{
+            fontSize: 'var(--text-6xl)',
+            fontWeight: 'extrabold',
+            color: 'white',
+            marginBottom: 'var(--space-4)',
+            letterSpacing: '-0.02em'
+          }}>
+            Price
+            <br />
+            <span style={{
+              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              Alerts
+            </span>
+          </h1>
+
+          <p className="animate-fadeInUp" style={{
+            fontSize: 'var(--text-xl)',
+            color: 'rgba(255, 255, 255, 0.95)',
+            maxWidth: '600px',
+            lineHeight: '1.6'
+          }}>
             Get notified when your favorite products drop to your target price
           </p>
 
-          <div style={{
+          {/* Stats Cards */}
+          <div className="animate-fadeInUp" style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '1.5rem',
-            marginTop: '2rem'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 'var(--space-4)',
+            marginTop: 'var(--space-8)',
+            animationDelay: '0.2s'
           }}>
             <div style={{
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              padding: '1.5rem',
-              borderRadius: 'var(--radius-lg)',
-              backdropFilter: 'blur(10px)'
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              padding: 'var(--space-6)',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+              <div style={{
+                fontSize: 'var(--text-5xl)',
+                fontWeight: 'bold',
+                color: 'white',
+                marginBottom: 'var(--space-2)',
+                lineHeight: '1'
+              }}>
                 {activeAlerts.length}
               </div>
-              <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Active Alerts</div>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'rgba(255, 255, 255, 0.9)' }}>
+                Active Alerts
+              </div>
             </div>
 
             <div style={{
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              padding: '1.5rem',
-              borderRadius: 'var(--radius-lg)',
-              backdropFilter: 'blur(10px)'
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              padding: 'var(--space-6)',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+              <div style={{
+                fontSize: 'var(--text-5xl)',
+                fontWeight: 'bold',
+                color: 'white',
+                marginBottom: 'var(--space-2)',
+                lineHeight: '1'
+              }}>
                 {triggeredAlerts.length}
               </div>
-              <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Price Drops</div>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'rgba(255, 255, 255, 0.9)' }}>
+                Price Drops
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Create Alert Button */}
-      <div style={{ marginBottom: '2rem' }}>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="btn btn-primary"
-          style={{ fontSize: '1.125rem', padding: '1rem 2rem' }}
-        >
-          <Plus size={24} />
-          Create New Alert
-        </button>
-      </div>
+      <div className="container" style={{ padding: 'var(--space-8) var(--space-4)' }}>
+        {/* Create Alert Button */}
+        <div className="animate-fadeInUp" style={{ marginBottom: 'var(--space-8)' }}>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="btn btn-primary hover-lift"
+            style={{
+              height: '3.5rem',
+              fontSize: 'var(--text-lg)',
+              background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+              boxShadow: '0 8px 24px rgba(236, 72, 153, 0.3)'
+            }}
+          >
+            <Plus size={24} />
+            Create New Alert
+            <ArrowRight size={20} />
+          </button>
+        </div>
 
-      {/* Triggered Alerts */}
-      {triggeredAlerts.length > 0 && (
-        <div style={{ marginBottom: '3rem' }}>
+        {/* Triggered Alerts */}
+        {triggeredAlerts.length > 0 && (
+          <div className="animate-fadeInUp" style={{ marginBottom: 'var(--space-8)', animationDelay: '0.1s' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-3)',
+              marginBottom: 'var(--space-6)'
+            }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: 'var(--radius-lg)',
+                background: 'var(--gradient-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <TrendingDown size={24} color="white" />
+              </div>
+              <h2 style={{ fontSize: 'var(--text-3xl)', margin: 0 }}>
+                Price Drops ({triggeredAlerts.length})
+              </h2>
+            </div>
+
+            <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
+              {triggeredAlerts.map((alert, index) => (
+                <div
+                  key={alert.id}
+                  className="card hover-lift animate-fadeInUp"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.1) 100%)',
+                    border: '2px solid var(--success)',
+                    animationDelay: `${index * 0.1}s`
+                  }}
+                >
+                  {/* Top success bar */}
+                  <div style={{
+                    height: '6px',
+                    background: 'var(--gradient-primary)',
+                    borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
+                    marginBottom: 'var(--space-4)'
+                  }} />
+
+                  <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'start', flexWrap: 'wrap' }}>
+                    <img
+                      src={alert.product_image || 'https://via.placeholder.com/120'}
+                      alt={alert.product_name}
+                      style={{
+                        width: '120px',
+                        height: '120px',
+                        objectFit: 'cover',
+                        borderRadius: 'var(--radius-lg)',
+                        backgroundColor: 'var(--bg-tertiary)',
+                        boxShadow: 'var(--shadow-md)'
+                      }}
+                      onError={(e) => e.target.src = 'https://via.placeholder.com/120'}
+                    />
+
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 'var(--space-2)',
+                        padding: 'var(--space-2) var(--space-4)',
+                        background: 'var(--gradient-primary)',
+                        color: 'white',
+                        borderRadius: 'var(--radius-full)',
+                        marginBottom: 'var(--space-4)',
+                        fontWeight: '600',
+                        fontSize: 'var(--text-sm)'
+                      }}>
+                        <Sparkles size={16} />
+                        PRICE DROP ALERT!
+                      </div>
+
+                      <h3 style={{
+                        fontSize: 'var(--text-2xl)',
+                        marginBottom: 'var(--space-2)'
+                      }}>
+                        {alert.product_name}
+                      </h3>
+
+                      <div style={{
+                        display: 'flex',
+                        gap: 'var(--space-2)',
+                        fontSize: 'var(--text-sm)',
+                        color: 'var(--text-secondary)',
+                        marginBottom: 'var(--space-4)'
+                      }}>
+                        {alert.brand && <span>{alert.brand}</span>}
+                        {alert.category && <span>• {alert.category}</span>}
+                      </div>
+
+                      {/* Price Chart */}
+                      {alert.price_history && alert.price_history.length > 0 && (
+                        <div style={{
+                          background: 'var(--bg-secondary)',
+                          borderRadius: 'var(--radius-lg)',
+                          padding: 'var(--space-4)',
+                          marginBottom: 'var(--space-4)'
+                        }}>
+                          <ResponsiveContainer width="100%" height={100}>
+                            <LineChart data={alert.price_history}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                              <XAxis
+                                dataKey="date"
+                                tick={{ fontSize: 10 }}
+                                stroke="var(--text-tertiary)"
+                              />
+                              <YAxis tick={{ fontSize: 10 }} stroke="var(--text-tertiary)" />
+                              <Tooltip
+                                contentStyle={{
+                                  background: 'var(--bg-primary)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: 'var(--radius-md)'
+                                }}
+                              />
+                              <Line
+                                type="monotone"
+                                dataKey="price"
+                                stroke="#10b981"
+                                strokeWidth={2}
+                                dot={{ fill: '#10b981', r: 3 }}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div>
+                          <div style={{
+                            fontSize: 'var(--text-xs)',
+                            color: 'var(--text-secondary)',
+                            marginBottom: 'var(--space-1)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Target Price
+                          </div>
+                          <div style={{
+                            fontSize: 'var(--text-3xl)',
+                            fontWeight: 'bold',
+                            background: 'var(--gradient-primary)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                          }}>
+                            ${alert.target_price.toFixed(2)}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => navigate(`/product/${alert.product_id}`)}
+                          className="btn btn-primary hover-lift"
+                          style={{
+                            background: 'var(--gradient-primary)'
+                          }}
+                        >
+                          View Product
+                          <ArrowRight size={18} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleDeleteAlert(alert.id)}
+                      className="btn btn-secondary"
+                      style={{ padding: 'var(--space-3)' }}
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* All Alerts */}
+        <div className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.75rem',
-            marginBottom: '1.5rem'
+            gap: 'var(--space-3)',
+            marginBottom: 'var(--space-6)'
           }}>
-            <TrendingDown size={28} color="var(--success)" />
-            <h2 style={{ margin: 0 }}>Price Drops ({triggeredAlerts.length})</h2>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: 'var(--radius-lg)',
+              background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Bell size={24} color="white" />
+            </div>
+            <h2 style={{ fontSize: 'var(--text-3xl)', margin: 0 }}>
+              All Alerts ({alerts.length})
+            </h2>
           </div>
 
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            {triggeredAlerts.map(alert => (
-              <div
-                key={alert.id}
-                className="card"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%)',
-                  border: '2px solid var(--success)',
-                  padding: '1.5rem'
-                }}
-              >
-                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'start' }}>
-                  <img
-                    src={alert.product_image || 'https://via.placeholder.com/100'}
-                    alt={alert.product_name}
-                    style={{
-                      width: '100px',
-                      height: '100px',
-                      objectFit: 'cover',
-                      borderRadius: 'var(--radius-md)',
-                      backgroundColor: 'var(--bg-tertiary)'
-                    }}
-                    onError={(e) => e.target.src = 'https://via.placeholder.com/100'}
-                  />
+          {alerts.length > 0 ? (
+            <div style={{ display: 'grid', gap: 'var(--space-4)' }}>
+              {alerts.map((alert, index) => (
+                <div
+                  key={alert.id}
+                  className="card hover-lift animate-fadeInUp"
+                  style={{
+                    opacity: alert.is_active ? 1 : 0.6,
+                    animationDelay: `${index * 0.1}s`
+                  }}
+                >
+                  <div style={{ display: 'flex', gap: 'var(--space-4)', alignItems: 'start', flexWrap: 'wrap' }}>
+                    <img
+                      src={alert.product_image || 'https://via.placeholder.com/100'}
+                      alt={alert.product_name}
+                      style={{
+                        width: '100px',
+                        height: '100px',
+                        objectFit: 'cover',
+                        borderRadius: 'var(--radius-lg)',
+                        backgroundColor: 'var(--bg-tertiary)'
+                      }}
+                      onError={(e) => e.target.src = 'https://via.placeholder.com/100'}
+                    />
 
-                  <div style={{ flex: 1 }}>
-                    <div style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.5rem 1rem',
-                      backgroundColor: 'var(--success)',
-                      color: 'white',
-                      borderRadius: 'var(--radius-md)',
-                      marginBottom: '1rem',
-                      fontWeight: 'bold'
-                    }}>
-                      <TrendingDown size={18} />
-                      Price Drop Alert!
-                    </div>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <h3 style={{
+                        fontSize: 'var(--text-xl)',
+                        marginBottom: 'var(--space-2)'
+                      }}>
+                        {alert.product_name}
+                      </h3>
 
-                    <h3 style={{ marginBottom: '0.5rem' }}>{alert.product_name}</h3>
-                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                      {alert.brand && <span>{alert.brand}</span>}
-                      {alert.category && <span>• {alert.category}</span>}
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <div>
-                        <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
-                          Target Price
-                        </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--success)' }}>
-                          ${alert.target_price.toFixed(2)}
-                        </div>
+                      <div style={{
+                        display: 'flex',
+                        gap: 'var(--space-2)',
+                        fontSize: 'var(--text-sm)',
+                        color: 'var(--text-secondary)',
+                        marginBottom: 'var(--space-4)'
+                      }}>
+                        {alert.brand && <span>{alert.brand}</span>}
+                        {alert.category && <span>• {alert.category}</span>}
                       </div>
 
+                      <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div>
+                          <div style={{
+                            fontSize: 'var(--text-xs)',
+                            color: 'var(--text-tertiary)',
+                            marginBottom: 'var(--space-1)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Target Price
+                          </div>
+                          <div style={{
+                            fontSize: 'var(--text-2xl)',
+                            fontWeight: 'bold',
+                            color: 'var(--primary)'
+                          }}>
+                            ${alert.target_price.toFixed(2)}
+                          </div>
+                        </div>
+
+                        <div>
+                          <div style={{
+                            fontSize: 'var(--text-xs)',
+                            color: 'var(--text-tertiary)',
+                            marginBottom: 'var(--space-1)',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Status
+                          </div>
+                          <div style={{
+                            display: 'inline-block',
+                            padding: 'var(--space-1) var(--space-3)',
+                            background: alert.is_active
+                              ? 'rgba(16, 185, 129, 0.1)'
+                              : 'rgba(156, 163, 175, 0.1)',
+                            color: alert.is_active ? 'var(--primary)' : 'var(--text-tertiary)',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: 'var(--text-sm)',
+                            fontWeight: '600'
+                          }}>
+                            {alert.is_active ? 'Active' : 'Paused'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
                       <button
-                        onClick={() => navigate(`/product/${alert.product_id}`)}
-                        className="btn btn-primary"
+                        onClick={() => handleToggleAlert(alert.id)}
+                        className="btn btn-secondary"
+                        title={alert.is_active ? 'Pause alert' : 'Activate alert'}
                       >
-                        View Product
+                        {alert.is_active ? 'Pause' : 'Activate'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAlert(alert.id)}
+                        className="btn btn-secondary"
+                        style={{ padding: 'var(--space-3)', color: 'var(--danger)' }}
+                      >
+                        <Trash2 size={20} />
                       </button>
                     </div>
                   </div>
-
-                  <button
-                    onClick={() => handleDeleteAlert(alert.id)}
-                    className="btn btn-sm btn-secondary"
-                    style={{ padding: '0.5rem' }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="card" style={{
+              textAlign: 'center',
+              padding: 'var(--space-16)',
+              background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(190, 24, 93, 0.1) 100%)',
+              border: '2px dashed var(--border)'
+            }}>
+              <div style={{
+                width: '96px',
+                height: '96px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(190, 24, 93, 0.15) 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto var(--space-6)'
+              }}>
+                <Bell size={48} color="#ec4899" />
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* All Alerts */}
-      <div>
-        <h2 style={{ marginBottom: '1.5rem' }}>
-          All Alerts ({alerts.length})
-        </h2>
-
-        {alerts.length > 0 ? (
-          <div style={{ display: 'grid', gap: '1rem' }}>
-            {alerts.map(alert => (
-              <div
-                key={alert.id}
-                className="card"
+              <h3 style={{
+                fontSize: 'var(--text-2xl)',
+                marginBottom: 'var(--space-3)'
+              }}>
+                No Price Alerts Yet
+              </h3>
+              <p style={{
+                color: 'var(--text-secondary)',
+                marginBottom: 'var(--space-6)',
+                maxWidth: '500px',
+                margin: '0 auto var(--space-6)'
+              }}>
+                Create your first price alert to get notified when products reach your target price
+              </p>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="btn btn-primary hover-lift"
                 style={{
-                  padding: '1.5rem',
-                  opacity: alert.is_active ? 1 : 0.6
+                  background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)'
                 }}
               >
-                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'start', flexWrap: 'wrap' }}>
-                  <img
-                    src={alert.product_image || 'https://via.placeholder.com/80'}
-                    alt={alert.product_name}
-                    style={{
-                      width: '80px',
-                      height: '80px',
-                      objectFit: 'cover',
-                      borderRadius: 'var(--radius-md)',
-                      backgroundColor: 'var(--bg-tertiary)'
-                    }}
-                    onError={(e) => e.target.src = 'https://via.placeholder.com/80'}
-                  />
-
-                  <div style={{ flex: 1, minWidth: '200px' }}>
-                    <h3 style={{ marginBottom: '0.5rem' }}>{alert.product_name}</h3>
-                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-                      {alert.brand && <span>{alert.brand}</span>}
-                      {alert.category && <span>• {alert.category}</span>}
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
-                          Target Price
-                        </div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                          ${alert.target_price.toFixed(2)}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>
-                          Status
-                        </div>
-                        <div style={{
-                          display: 'inline-block',
-                          padding: '0.25rem 0.75rem',
-                          backgroundColor: alert.is_active ? 'rgba(22, 163, 74, 0.1)' : 'rgba(156, 163, 175, 0.1)',
-                          color: alert.is_active ? 'var(--primary)' : 'var(--text-tertiary)',
-                          borderRadius: 'var(--radius-sm)',
-                          fontSize: '0.875rem',
-                          fontWeight: '500'
-                        }}>
-                          {alert.is_active ? 'Active' : 'Paused'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={() => handleToggleAlert(alert.id)}
-                      className="btn btn-sm btn-secondary"
-                      title={alert.is_active ? 'Pause alert' : 'Activate alert'}
-                    >
-                      {alert.is_active ? 'Pause' : 'Activate'}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAlert(alert.id)}
-                      className="btn btn-sm btn-secondary"
-                      style={{ padding: '0.5rem', color: 'var(--danger)' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="card" style={{
-            textAlign: 'center',
-            padding: '4rem 2rem',
-            background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(249, 115, 22, 0.1) 100%)'
-          }}>
-            <Bell size={64} color="var(--text-tertiary)" style={{ margin: '0 auto 1.5rem' }} />
-            <h3 style={{ marginBottom: '0.75rem' }}>No Price Alerts Yet</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-              Create your first price alert to get notified when products reach your target price
-            </p>
-            <button onClick={() => setShowCreateModal(true)} className="btn btn-primary">
-              <Plus size={20} />
-              Create Your First Alert
-            </button>
-          </div>
-        )}
+                <Plus size={20} />
+                Create Your First Alert
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Create Alert Modal */}
@@ -443,36 +674,56 @@ const PriceAlertsPage = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            background: 'rgba(0, 0, 0, 0.7)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 100,
-            padding: '1rem',
-            backdropFilter: 'blur(4px)'
+            padding: 'var(--space-4)',
+            backdropFilter: 'blur(8px)'
           }}
           onClick={() => setShowCreateModal(false)}
         >
           <div
-            className="card"
+            className="card animate-fadeIn"
             style={{
               width: '100%',
               maxWidth: '600px',
-              maxHeight: '80vh',
+              maxHeight: '85vh',
               overflow: 'auto',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+              boxShadow: 'var(--shadow-2xl)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ margin: 0 }}>Create Price Alert</h2>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 'var(--space-6)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Bell size={24} color="white" />
+                </div>
+                <h2 style={{ margin: 0, fontSize: 'var(--text-3xl)' }}>
+                  Create Price Alert
+                </h2>
+              </div>
               <button
                 onClick={() => setShowCreateModal(false)}
                 style={{
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '0.5rem',
+                  padding: 'var(--space-2)',
                   color: 'var(--text-secondary)'
                 }}
               >
@@ -482,13 +733,12 @@ const PriceAlertsPage = () => {
 
             {!selectedProduct ? (
               <>
-                {/* Search Products */}
-                <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+                <div style={{ position: 'relative', marginBottom: 'var(--space-6)' }}>
                   <Search
                     size={20}
                     style={{
                       position: 'absolute',
-                      left: '1rem',
+                      left: 'var(--space-4)',
                       top: '50%',
                       transform: 'translateY(-50%)',
                       color: 'var(--text-tertiary)'
@@ -500,50 +750,63 @@ const PriceAlertsPage = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="input"
-                    style={{ paddingLeft: '3rem' }}
+                    style={{
+                      paddingLeft: 'var(--space-12)',
+                      height: '3.5rem',
+                      fontSize: 'var(--text-lg)'
+                    }}
                     autoFocus
                   />
                 </div>
 
-                {/* Search Results */}
                 {searching && <LoadingSpinner />}
 
                 {!searching && searchResults.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
                     {searchResults.map(product => (
                       <button
                         key={product.id}
                         onClick={() => setSelectedProduct(product)}
+                        className="hover-lift"
                         style={{
-                          padding: '1rem',
+                          padding: 'var(--space-4)',
                           border: '2px solid var(--border)',
-                          borderRadius: 'var(--radius-md)',
-                          backgroundColor: 'transparent',
+                          borderRadius: 'var(--radius-lg)',
+                          background: 'transparent',
                           cursor: 'pointer',
                           textAlign: 'left',
                           transition: 'var(--transition)',
                           display: 'flex',
-                          gap: '1rem',
+                          gap: 'var(--space-4)',
                           alignItems: 'center'
                         }}
-                        onMouseEnter={(e) => e.target.style.borderColor = 'var(--primary)'}
+                        onMouseEnter={(e) => e.target.style.borderColor = '#ec4899'}
                         onMouseLeave={(e) => e.target.style.borderColor = 'var(--border)'}
                       >
                         <img
-                          src={product.image_url || 'https://via.placeholder.com/60'}
+                          src={product.image_url || 'https://via.placeholder.com/80'}
                           alt={product.name}
                           style={{
-                            width: '60px',
-                            height: '60px',
+                            width: '80px',
+                            height: '80px',
                             objectFit: 'cover',
-                            borderRadius: 'var(--radius-md)',
+                            borderRadius: 'var(--radius-lg)',
                             backgroundColor: 'var(--bg-tertiary)'
                           }}
-                          onError={(e) => e.target.src = 'https://via.placeholder.com/60'}
+                          onError={(e) => e.target.src = 'https://via.placeholder.com/80'}
                         />
                         <div style={{ flex: 1 }}>
-                          <h4 style={{ marginBottom: '0.25rem' }}>{product.name}</h4>
-                          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>
+                          <h4 style={{
+                            marginBottom: 'var(--space-1)',
+                            fontSize: 'var(--text-lg)'
+                          }}>
+                            {product.name}
+                          </h4>
+                          <p style={{
+                            fontSize: 'var(--text-sm)',
+                            color: 'var(--text-secondary)',
+                            margin: 0
+                          }}>
                             {product.brand && `${product.brand} • `}
                             {product.category}
                           </p>
@@ -554,44 +817,70 @@ const PriceAlertsPage = () => {
                 )}
 
                 {!searching && searchQuery && searchResults.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                    <AlertCircle size={48} style={{ margin: '0 auto 1rem' }} />
+                  <div style={{
+                    textAlign: 'center',
+                    padding: 'var(--space-12)',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    <AlertCircle size={64} style={{
+                      margin: '0 auto var(--space-4)',
+                      color: 'var(--text-tertiary)'
+                    }} />
                     <p>No products found. Try a different search term.</p>
                   </div>
                 )}
 
                 {!searchQuery && (
-                  <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                    <Search size={48} style={{ margin: '0 auto 1rem' }} />
+                  <div style={{
+                    textAlign: 'center',
+                    padding: 'var(--space-12)',
+                    color: 'var(--text-secondary)'
+                  }}>
+                    <Search size={64} style={{
+                      margin: '0 auto var(--space-4)',
+                      color: 'var(--text-tertiary)'
+                    }} />
                     <p>Start typing to search for products</p>
                   </div>
                 )}
               </>
             ) : (
               <>
-                {/* Selected Product */}
                 <div style={{
-                  padding: '1.5rem',
-                  backgroundColor: 'var(--bg-secondary)',
-                  borderRadius: 'var(--radius-lg)',
-                  marginBottom: '1.5rem'
+                  padding: 'var(--space-6)',
+                  background: 'var(--bg-secondary)',
+                  borderRadius: 'var(--radius-xl)',
+                  marginBottom: 'var(--space-6)'
                 }}>
-                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{
+                    display: 'flex',
+                    gap: 'var(--space-4)',
+                    marginBottom: 'var(--space-4)'
+                  }}>
                     <img
-                      src={selectedProduct.image_url || 'https://via.placeholder.com/80'}
+                      src={selectedProduct.image_url || 'https://via.placeholder.com/100'}
                       alt={selectedProduct.name}
                       style={{
-                        width: '80px',
-                        height: '80px',
+                        width: '100px',
+                        height: '100px',
                         objectFit: 'cover',
-                        borderRadius: 'var(--radius-md)',
+                        borderRadius: 'var(--radius-lg)',
                         backgroundColor: 'var(--bg-tertiary)'
                       }}
-                      onError={(e) => e.target.src = 'https://via.placeholder.com/80'}
+                      onError={(e) => e.target.src = 'https://via.placeholder.com/100'}
                     />
                     <div>
-                      <h3 style={{ marginBottom: '0.5rem' }}>{selectedProduct.name}</h3>
-                      <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0 }}>
+                      <h3 style={{
+                        marginBottom: 'var(--space-2)',
+                        fontSize: 'var(--text-xl)'
+                      }}>
+                        {selectedProduct.name}
+                      </h3>
+                      <p style={{
+                        fontSize: 'var(--text-sm)',
+                        color: 'var(--text-secondary)',
+                        margin: 0
+                      }}>
                         {selectedProduct.brand && `${selectedProduct.brand} • `}
                         {selectedProduct.category}
                       </p>
@@ -599,15 +888,22 @@ const PriceAlertsPage = () => {
                   </div>
                   <button
                     onClick={() => setSelectedProduct(null)}
-                    className="btn btn-sm btn-secondary"
+                    className="btn btn-secondary"
                   >
                     Change Product
                   </button>
                 </div>
 
-                {/* Target Price */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                <div style={{ marginBottom: 'var(--space-6)' }}>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: 'var(--space-2)',
+                    fontWeight: '600',
+                    fontSize: 'var(--text-sm)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: 'var(--text-secondary)'
+                  }}>
                     Target Price
                   </label>
                   <input
@@ -618,19 +914,31 @@ const PriceAlertsPage = () => {
                     onChange={(e) => setTargetPrice(e.target.value)}
                     className="input"
                     placeholder="Enter your target price (e.g., 4.99)"
-                    style={{ fontSize: '1.25rem' }}
+                    style={{
+                      fontSize: 'var(--text-2xl)',
+                      height: '4rem',
+                      fontWeight: 'bold'
+                    }}
                     autoFocus
                   />
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                  <p style={{
+                    fontSize: 'var(--text-sm)',
+                    color: 'var(--text-secondary)',
+                    marginTop: 'var(--space-2)'
+                  }}>
                     You'll be notified when the price drops to or below this amount
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
                   <button
                     onClick={handleCreateAlert}
-                    className="btn btn-primary"
-                    style={{ flex: 1 }}
+                    className="btn btn-primary hover-lift"
+                    style={{
+                      flex: 1,
+                      height: '3.5rem',
+                      background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)'
+                    }}
                   >
                     <Bell size={20} />
                     Create Alert
@@ -643,6 +951,7 @@ const PriceAlertsPage = () => {
                       setSearchQuery('');
                     }}
                     className="btn btn-secondary"
+                    style={{ height: '3.5rem' }}
                   >
                     Cancel
                   </button>
